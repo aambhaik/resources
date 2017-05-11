@@ -46,13 +46,13 @@
                                 "attributes": [
                                     {
                                         "name": "method",
-                                        "value": "",
+                                        "value": "GET",
                                         "required": true,
                                         "type": "string"
                                     },
                                     {
                                         "name": "uri",
-                                        "value": "",
+                                        "value": "http://petstore.swagger.io/v2/pet/1",
                                         "required": true,
                                         "type": "string"
                                     },
@@ -86,7 +86,7 @@
                                 "attributes": [
                                     {
                                         "name": "message",
-                                        "value": "",
+                                        "value": "New request",
                                         "required": false,
                                         "type": "string"
                                     },
@@ -114,13 +114,13 @@
                                 "attributes": [
                                     {
                                         "name": "code",
-                                        "value": null,
+                                        "value": 200,
                                         "required": true,
                                         "type": "integer"
                                     },
                                     {
                                         "name": "data",
-                                        "value": null,
+                                        "value": "Successfully accessed pet data.",
                                         "required": false,
                                         "type": "any"
                                     }
