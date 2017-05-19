@@ -30,6 +30,7 @@
             "name": "ss",
             "data": {
                 "flow": {
+                    "explicitReply": true,
                     "type": 1,
                     "attributes": [],
                     "rootTask": {
