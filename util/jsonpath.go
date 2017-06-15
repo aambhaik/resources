@@ -18,7 +18,7 @@ func JsonPathEval(jsonData string, expression string) (*string, error) {
 
 	eval, err := jsonpath.EvalPathsInBytes([]byte(jsonData), paths)
 	if err != nil {
-		flogoLogger.Infof("uable to eval expression, error is [%v]", err)
+		flogoLogger.Infof("unable to eval expression, error is [%v]", err)
 		return nil, err
 	}
 

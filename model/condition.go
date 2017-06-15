@@ -76,7 +76,7 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 	if index := strings.Index(condition, util.Gateway_Link_Condition_Operator_Equals); index > -1 {
 		//operation is Equals
 		//find the LHS
-		lhs := strings.TrimSpace(condition[:index])
+		lhs := strings.TrimSpace(condition[:index]) + "+"	// Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
 		//get the value for LHS
 		flogoLogger.Infof("left hand side found to be [%v], content is [%v]", lhs, content)
 		output, err := util.JsonPathEval(content, lhs)
@@ -98,7 +98,7 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 		//operation is Not Equals
 
 		//find the LHS
-		lhs := strings.TrimSpace(condition[:index])
+		lhs := strings.TrimSpace(condition[:index]) + "+"	// Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
 		//get the value for LHS
 		output, err := util.JsonPathEval(content, lhs)
 		if err != nil {
