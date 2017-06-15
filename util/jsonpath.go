@@ -2,7 +2,6 @@ package util
 
 import (
 	"github.com/NodePrime/jsonpath"
-	"fmt"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
