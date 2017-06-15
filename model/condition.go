@@ -2,10 +2,10 @@ package model
 
 import (
 	"fmt"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/aambhaik/resources/util"
 	"github.com/pkg/errors"
 	"strings"
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
 
 var flogoLogger = logger.GetLogger("trigger-tibco-kafkasubv2")
@@ -54,16 +54,21 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 		If the value starts and ends without the single quote, then it is treated as an integer or a boolean.
 	*/
 
+	//check if the message content is JSON first. mashling only supports JSON payloads for condition/content evaluation
+	if !util.IsJSON(content) {
+		return nil, errors.New(fmt.Sprintf("Content is not a valid JSON payload [%v]", content))
+	}
+
 	if !strings.HasPrefix(conditionStr, util.Gateway_Link_Condition_LHS_Start_Expr) {
 		return nil, errors.New("If does not match expected semantics, missing '${' at the start.")
 	}
 	if !strings.HasSuffix(conditionStr, util.Gateway_Link_Condition_LHS_End_Expr) {
-		return nil, errors.New("If does not match expected semantics, missing '}' at the end.")
+		return nil, errors.New("condition 'If' does not match expected semantics, missing '}' at the end.")
 	}
 
 	condition := conditionStr[len(util.Gateway_Link_Condition_LHS_Start_Expr) : len(conditionStr)-len(util.Gateway_Link_Condition_LHS_End_Expr)]
 	if !strings.HasPrefix(condition, util.Gateway_Link_Condition_LHS_JSON_Content) {
-		return nil, errors.New(fmt.Sprintf("If JSONPath must start with %v", util.Gateway_Link_Condition_LHS_JSON_Content))
+		return nil, errors.New(fmt.Sprintf("condition 'If' JSONPath must start with %v", util.Gateway_Link_Condition_LHS_JSON_Content))
 	}
 
 	condition = strings.Replace(condition, util.Gateway_Link_Condition_LHS_JSON_Content, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
@@ -71,25 +76,24 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 	condition = strings.TrimSpace(condition)
 
 	var operation ConditionalOperation
-	flogoLogger.Infof("condition is [%v]", condition)
+	flogoLogger.Debugf("condition is [%v]", condition)
 
 	if index := strings.Index(condition, util.Gateway_Link_Condition_Operator_Equals); index > -1 {
 		//operation is Equals
 		//find the LHS
-		lhs := strings.TrimSpace(condition[:index]) + "+"	// Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
+		lhs := strings.TrimSpace(condition[:index]) + "+" // Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
 		//get the value for LHS
-		flogoLogger.Infof("left hand side found to be [%v], content is [%v]", lhs, content)
+		flogoLogger.Infof("condition: left hand side found to be [%v], content is [%v]", lhs, content)
 		output, err := util.JsonPathEval(content, lhs)
 		if err != nil {
 			return nil, err
 		}
-		flogoLogger.Infof("json path eval output is [%v]", output)
-
 		outputValue := *output
+		flogoLogger.Infof("json path eval output is [%v]", outputValue)
 
 		//find the RHS
 		rhs := strings.TrimSpace(condition[index+len(util.Gateway_Link_Condition_Operator_Equals):])
-		flogoLogger.Infof("right hand side found to be [%v]", rhs)
+		flogoLogger.Debugf("condition: right hand side found to be [%v]", rhs)
 
 		//create the equals struct instance
 		operation = Equals{If{Lhs: outputValue, Rhs: rhs}}
@@ -98,7 +102,7 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 		//operation is Not Equals
 
 		//find the LHS
-		lhs := strings.TrimSpace(condition[:index]) + "+"	// Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
+		lhs := strings.TrimSpace(condition[:index]) + "+" // Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
 		//get the value for LHS
 		output, err := util.JsonPathEval(content, lhs)
 		if err != nil {

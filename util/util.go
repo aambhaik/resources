@@ -87,3 +87,9 @@ func ValidateTriggerConfigExpr(expression *string) (bool, *string) {
 		return false, &exprValue
 	}
 }
+
+func IsJSON(s string) bool {
+	var js interface{}
+	return json.Unmarshal([]byte(s), &js) == nil
+
+}
