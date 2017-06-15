@@ -76,20 +76,19 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 	condition = strings.TrimSpace(condition)
 
 	var operation ConditionalOperation
-	flogoLogger.Debugf("condition is [%v]", condition)
 
 	if index := strings.Index(condition, util.Gateway_Link_Condition_Operator_Equals); index > -1 {
 		//operation is Equals
 		//find the LHS
 		lhs := strings.TrimSpace(condition[:index]) + "+" // Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
 		//get the value for LHS
-		flogoLogger.Infof("condition: left hand side found to be [%v], content is [%v]", lhs, content)
+		flogoLogger.Debugf("condition: left hand side found to be [%v], content is [%v]", lhs, content)
 		output, err := util.JsonPathEval(content, lhs)
 		if err != nil {
 			return nil, err
 		}
 		outputValue := *output
-		flogoLogger.Infof("json path eval output is [%v]", outputValue)
+		flogoLogger.Debugf("json path eval output is [%v]", outputValue)
 
 		//find the RHS
 		rhs := strings.TrimSpace(condition[index+len(util.Gateway_Link_Condition_Operator_Equals):])
