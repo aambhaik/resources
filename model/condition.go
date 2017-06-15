@@ -68,13 +68,15 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 
 	condition = strings.Replace(condition, util.Gateway_Link_Condition_LHS_JSON_Content, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
 
+	condition = strings.TrimSpace(condition)
+
 	var operation ConditionalOperation
 	flogoLogger.Infof("condition is [%v]", condition)
 
 	if index := strings.Index(condition, util.Gateway_Link_Condition_Operator_Equals); index > -1 {
 		//operation is Equals
 		//find the LHS
-		lhs := condition[:index]
+		lhs := strings.TrimSpace(condition[:index])
 		//get the value for LHS
 		flogoLogger.Infof("left hand side found to be [%v], content is [%v]", lhs, content)
 		output, err := util.JsonPathEval(content, lhs)
@@ -86,7 +88,7 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 		outputValue := *output
 
 		//find the RHS
-		rhs := condition[index+len(util.Gateway_Link_Condition_Operator_Equals):]
+		rhs := strings.TrimSpace(condition[index+len(util.Gateway_Link_Condition_Operator_Equals):])
 		flogoLogger.Infof("right hand side found to be [%v]", rhs)
 
 		//create the equals struct instance
@@ -96,7 +98,7 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 		//operation is Not Equals
 
 		//find the LHS
-		lhs := condition[:index]
+		lhs := strings.TrimSpace(condition[:index])
 		//get the value for LHS
 		output, err := util.JsonPathEval(content, lhs)
 		if err != nil {
@@ -105,7 +107,7 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 		outputValue := *output
 
 		//find the RHS
-		rhs := condition[index+len(util.Gateway_Link_Condition_Operator_NotEquals):]
+		rhs := strings.TrimSpace(condition[index+len(util.Gateway_Link_Condition_Operator_NotEquals):])
 
 		//create the equals struct instance
 		operation = NotEquals{If{Lhs: outputValue, Rhs: rhs}}
