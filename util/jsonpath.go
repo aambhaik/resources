@@ -5,6 +5,7 @@ import (
 	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"github.com/pkg/errors"
 	"fmt"
+	"strings"
 )
 
 var flogoLogger = logger.GetLogger("trigger-tibco-kafkasubv2")
@@ -25,7 +26,10 @@ func JsonPathEval(jsonData string, expression string) (*string, error) {
 	for {
 		if result, ok := eval.Next(); ok {
 			//return after the first match
-			value := string(result.Value)
+			value := string(result.Value)	//The value obtained will be encased in double quote characters, e.g. "USA" when the value happens to be USA.
+			//Trim the double quote suffix and prefix
+			value = strings.TrimPrefix(value, "\"")
+			value = strings.TrimSuffix(value, "\"")
 			flogoLogger.Infof("expression parsed is [%v], value is [%v]", expression, value)
 			return &value, nil // true -> show keys in pretty string
 		} else {
