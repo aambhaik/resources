@@ -5,7 +5,10 @@ import (
 	"github.com/aambhaik/resources/util"
 	"github.com/pkg/errors"
 	"strings"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 )
+
+var flogoLogger = logger.GetLogger("trigger-tibco-kafkasubv2")
 
 type ConditionalOperation interface {
 	exec() bool
@@ -66,25 +69,25 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 	condition = strings.Replace(condition, util.Gateway_Link_Condition_LHS_JSON_Content, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
 
 	var operation ConditionalOperation
+	flogoLogger.Infof("condition is [%v]", condition)
+
 	if index := strings.Index(condition, util.Gateway_Link_Condition_Operator_Equals); index > -1 {
 		//operation is Equals
-		fmt.Sprintf("condition is [%v]", condition)
-
 		//find the LHS
 		lhs := condition[:index]
 		//get the value for LHS
-		fmt.Sprintf("left hand side found to be [%v], content is [%v]", lhs, content)
+		flogoLogger.Infof("left hand side found to be [%v], content is [%v]", lhs, content)
 		output, err := util.JsonPathEval(content, lhs)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Sprintf("json path eval output is [%v]", output)
+		flogoLogger.Infof("json path eval output is [%v]", output)
 
 		outputValue := *output
 
 		//find the RHS
 		rhs := condition[index+len(util.Gateway_Link_Condition_Operator_Equals):]
-		fmt.Sprintf("right hand side found to be [%v]", rhs)
+		flogoLogger.Infof("right hand side found to be [%v]", rhs)
 
 		//create the equals struct instance
 		operation = Equals{If{Lhs: outputValue, Rhs: rhs}}
