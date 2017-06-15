@@ -25,7 +25,7 @@ func JsonPathEval(jsonData string, expression string) (*string, error) {
 	for {
 		if result, ok := eval.Next(); ok {
 			//return after the first match
-			value := result.Pretty(false)
+			value := string(result.Value)
 			flogoLogger.Infof("expression parsed is [%v], value is [%v]", expression, value)
 			return &value, nil // true -> show keys in pretty string
 		} else {
