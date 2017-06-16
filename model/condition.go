@@ -67,11 +67,13 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 	}
 
 	condition := conditionStr[len(util.Gateway_Link_Condition_LHS_Start_Expr) : len(conditionStr)-len(util.Gateway_Link_Condition_LHS_End_Expr)]
-	if !strings.HasPrefix(condition, util.Gateway_Link_Condition_LHS_JSON_Content) {
-		return nil, errors.New(fmt.Sprintf("condition 'If' JSONPath must start with %v", util.Gateway_Link_Condition_LHS_JSON_Content))
+	contentRoot := util.GetContentRoot()
+
+	if !strings.HasPrefix(condition, contentRoot) {
+		return nil, errors.New(fmt.Sprintf("condition 'If' JSONPath must start with %v", contentRoot))
 	}
 
-	condition = strings.Replace(condition, util.Gateway_Link_Condition_LHS_JSON_Content, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
+	condition = strings.Replace(condition, contentRoot, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
 
 	condition = strings.TrimSpace(condition)
 
