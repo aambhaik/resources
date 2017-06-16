@@ -31,6 +31,10 @@ type In struct {
 	If
 }
 
+type NotIn struct {
+	If
+}
+
 func (oper Equals) exec() bool {
 	return oper.Lhs == oper.Rhs
 }
@@ -45,11 +49,24 @@ func (oper In) exec() bool {
 	oper.Rhs = strings.TrimSuffix(oper.Rhs, ")")
 	values := strings.Split(oper.Rhs, ",")
 	for _, value := range values {
-		if value == oper.Lhs {
+		if strings.TrimSpace(value) == oper.Lhs {
 			return true
 		}
 	}
 	return false
+}
+
+func (oper NotIn) exec() bool {
+	//RHS will be starting with '(' and ending with ')' and the values will be separated by a comma ','
+	oper.Rhs = strings.TrimPrefix(oper.Rhs, "(")
+	oper.Rhs = strings.TrimSuffix(oper.Rhs, ")")
+	values := strings.Split(oper.Rhs, ",")
+	for _, value := range values {
+		if strings.TrimSpace(value) == oper.Lhs {
+			return false
+		}
+	}
+	return true
 }
 
 func GetConditionOperation(conditionStr string, content string) (*ConditionalOperation, error) {
@@ -94,8 +111,16 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 
 	condition = strings.TrimSpace(condition)
 
-	var operation ConditionalOperation
+	operation, err := getOperation(condition, content)
+	if err != nil {
+		return nil, err
+	}
+	return operation, nil
 
+}
+
+func getOperation(condition string, content string) (*ConditionalOperation, error) {
+	var operation ConditionalOperation
 	if index := strings.Index(condition, util.Gateway_Link_Condition_Operator_Equals); index > -1 {
 		//operation is Equals
 		//find the LHS
@@ -151,14 +176,30 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 		//create the equals struct instance
 		operation = In{If{Lhs: outputValue, Rhs: rhs}}
 
+	} else if index := strings.Index(condition, util.Gateway_Link_Condition_Operator_NotIn); index > -1 {
+		//operator is In
+
+		//find the LHS
+		lhs := strings.TrimSpace(condition[:index]) + "+" // Important!! The '+' at the end is required to access the value from jsonpath evaluation result!
+		//get the value for LHS
+		output, err := util.JsonPathEval(content, lhs)
+		if err != nil {
+			return nil, err
+		}
+		outputValue := *output
+
+		//find the RHS
+		rhs := strings.TrimSpace(condition[index+len(util.Gateway_Link_Condition_Operator_NotIn):])
+
+		//create the equals struct instance
+		operation = In{If{Lhs: outputValue, Rhs: rhs}}
+
 	} else {
 		//unknown operator?
 		operators := []interface{}{util.Gateway_Link_Condition_Operator_Equals, util.Gateway_Link_Condition_Operator_NotEquals}
 		return nil, errors.New(fmt.Sprintf("Unsupported operator found in the condition [%v], supported operators are [%v]", condition, operators))
 	}
-
 	return &operation, nil
-
 }
 
 func Evaluate(operation *ConditionalOperation) bool {
