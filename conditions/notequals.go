@@ -1,24 +1,23 @@
-package operators
+package condition
 
 import (
-	"github.com/aambhaik/resources/conditions"
 	"strings"
 )
 
-var infoNotEquals = &condition.OperatorInfo{
+var infoNotEquals = &OperatorInfo{
 	Name:        "!=",
 	Description: `Support for not-equals operation to be used in the conditions`,
 }
 
 func init() {
-	condition.OperatorRegistry.RegisterOperator(&NotEquals{info: infoNotEquals})
+	OperatorRegistry.RegisterOperator(&NotEquals{info: infoNotEquals})
 }
 
 type NotEquals struct {
-	info *condition.OperatorInfo
+	info *OperatorInfo
 }
 
-func (o *NotEquals) OperatorInfo() *condition.OperatorInfo {
+func (o *NotEquals) OperatorInfo() *OperatorInfo {
 	return o.info
 }
 

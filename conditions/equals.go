@@ -1,24 +1,27 @@
-package operators
+package condition
 
 import (
-	"github.com/aambhaik/resources/conditions"
+	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"strings"
 )
 
-var infoEquals = &condition.OperatorInfo{
+var fLogger = logger.GetLogger("event-link-operator")
+
+var infoEquals = &OperatorInfo{
 	Name:        "==",
 	Description: `Support for equals operation to be used in the conditions`,
 }
 
 func init() {
-	condition.OperatorRegistry.RegisterOperator(&Equals{info: infoEquals})
+	OperatorRegistry.RegisterOperator(&Equals{info: infoEquals})
+	fLogger.Debugf("Operator equals registered!")
 }
 
 type Equals struct {
-	info *condition.OperatorInfo
+	info *OperatorInfo
 }
 
-func (o *Equals) OperatorInfo() *condition.OperatorInfo {
+func (o *Equals) OperatorInfo() *OperatorInfo {
 	return o.info
 }
 

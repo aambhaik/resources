@@ -40,7 +40,6 @@ func NewOperatorRegistry() *OperRegistry {
 
 // RegisterOperator registers an operator
 func (r *OperRegistry) RegisterOperator(operator Operator) {
-
 	r.operatorsMu.Lock()
 	defer r.operatorsMu.Unlock()
 
