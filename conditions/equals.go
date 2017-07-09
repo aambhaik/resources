@@ -1,11 +1,8 @@
 package condition
 
 import (
-	"github.com/TIBCOSoftware/flogo-lib/logger"
 	"strings"
 )
-
-var fLogger = logger.GetLogger("event-link-operator")
 
 var infoEquals = &OperatorInfo{
 	Name:        "==",
