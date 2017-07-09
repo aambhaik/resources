@@ -119,3 +119,17 @@ func ValidateEnvPropertySettingExpr(expression *string) (bool, *string) {
 		return false, &exprValue
 	}
 }
+
+func IsJSON(s string) bool {
+	var js interface{}
+	return json.Unmarshal([]byte(s), &js) == nil
+}
+
+func GetContentRoot() string {
+	contentRoot := os.Getenv(Gateway_JSON_Content_Root_Env_Key)
+	if contentRoot == "" {
+		//use the default value
+		contentRoot = Gateway_Link_Condition_LHS_JSON_Content_Prefix_Default
+	}
+	return contentRoot
+}
