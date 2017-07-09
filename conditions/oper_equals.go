@@ -11,7 +11,6 @@ var infoEquals = &OperatorInfo{
 
 func init() {
 	OperatorRegistry.RegisterOperator(&Equals{info: infoEquals})
-	fLogger.Debugf("Operator equals registered!")
 }
 
 type Equals struct {
