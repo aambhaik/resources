@@ -3,7 +3,8 @@ package model
 import (
 	"fmt"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/aambhaik/timeservice/util"
+	"github.com/aambhaik/resources/util"
+	cutil "github.com/aambhaik/resources/conditions"
 	"github.com/pkg/errors"
 	"strings"
 )
@@ -89,7 +90,7 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 	*/
 
 	//check if the message content is JSON first. mashling only supports JSON payloads for condition/content evaluation
-	if !util.IsJSON(content) {
+	if !cutil.IsJSON(content) {
 		return nil, errors.New(fmt.Sprintf("Content is not a valid JSON payload [%v]", content))
 	}
 
@@ -101,7 +102,7 @@ func GetConditionOperation(conditionStr string, content string) (*ConditionalOpe
 	}
 
 	condition := conditionStr[len(util.Gateway_Link_Condition_LHS_Start_Expr) : len(conditionStr)-len(util.Gateway_Link_Condition_LHS_End_Expr)]
-	contentRoot := util.GetContentRoot()
+	contentRoot := cutil.GetContentRoot()
 
 	if !strings.HasPrefix(condition, contentRoot) {
 		return nil, errors.New(fmt.Sprintf("condition 'If' JSONPath must start with %v", contentRoot))
