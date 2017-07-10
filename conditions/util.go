@@ -15,21 +15,24 @@ func GetOperatorInExpression(expression string) (*Operator, *string, error) {
 	var operatorName *string
 	operators := OperatorRegistry.Operators()
 	for _, o := range operators {
-		name := o.OperatorInfo().Name
-		// Find words in the expression that *start* with operator
-		pattern := `\b` + " " + name + " "
-		r, _ := regexp.Compile(pattern)
+		names := o.OperatorInfo().Names
+		for _, name := range names {
+			// Find words in the expression that *start* with operator
+			pattern := `\b` + " " + name + " "
+			r, _ := regexp.Compile(pattern)
 
-		if r.MatchString(expression) {
-			op, exists := OperatorRegistry.Operator(name)
-			if !exists {
-				continue
-			} else {
-				oper = &op
-				operatorName = &name
-				break
+			if r.MatchString(expression) {
+				op, exists := OperatorRegistry.Operator(name)
+				if !exists {
+					continue
+				} else {
+					oper = &op
+					operatorName = &name
+					break
+				}
 			}
 		}
+
 	}
 	if oper == nil {
 		return nil, nil, errors.Errorf("invalid operators found in expression [%v]", expression)
@@ -77,25 +80,28 @@ func ValidateOperatorInExpression(expression string) {
 	operFound := false
 	operators := OperatorRegistry.Operators()
 	for _, o := range operators {
-		name := o.OperatorInfo().Name
-		// Find words in the expression that *start* with operator
-		pattern := `\b` + " " + name + " "
-		r, _ := regexp.Compile(pattern)
+		names := o.OperatorInfo().Names
+		for _, name := range names {
+			// Find words in the expression that *start* with operator
+			pattern := `\b` + " " + name + " "
+			r, _ := regexp.Compile(pattern)
 
-		if r.MatchString(expression) {
-			_, exists := OperatorRegistry.Operator(name)
-			if !exists {
-				continue
-			} else {
-				if !operFound {
-					operFound = true
+			if r.MatchString(expression) {
+				_, exists := OperatorRegistry.Operator(name)
+				if !exists {
+					continue
 				} else {
-					//already one operator was found in the expression. here's another!
-					//multiple operators are not allowed in a single expression
-					panic(fmt.Errorf("Multiple operators not allowed in expression: [%v]", originalExpression))
+					if !operFound {
+						operFound = true
+					} else {
+						//already one operator was found in the expression. here's another!
+						//multiple operators are not allowed in a single expression
+						panic(fmt.Errorf("Multiple operators not allowed in expression: [%v]", originalExpression))
+					}
 				}
 			}
 		}
+
 	}
 
 	if !operFound {
@@ -103,7 +109,7 @@ func ValidateOperatorInExpression(expression string) {
 		for k := range OperatorRegistry.operators {
 			operators = append(operators, k)
 		}
-		panic(fmt.Errorf("No valid operator found in expression: [%v], supported operators are %v", originalExpression, "[" + strings.Join(operators, ", ") + "]"))
+		panic(fmt.Errorf("No valid operator found in expression: [%v], supported operators are %v", originalExpression, "["+strings.Join(operators, ", ")+"]"))
 	}
 }
 

@@ -10,10 +10,13 @@ used directly in an expression in mashling event-links. the operator
 must be preceded by a space (' ') and succeeded by a space (' ') when
 used in an expression.
 
+an operator can have more than one names. make sure that the names do not
+collide with other operators.
+
 e.g. ${trigger.content.country notin (USA,IND,CHN,JPN)}
 */
 var infoNotIn = &OperatorInfo{
-	Name:        "notin",
+	Names:       []string{"notin"},
 	Description: `Support for 'not in' operation to be used in the conditions`,
 }
 

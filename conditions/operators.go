@@ -46,13 +46,16 @@ func (r *OperRegistry) RegisterOperator(operator Operator) {
 		panic("OperatorRegistry: operator cannot be nil")
 	}
 
-	operatorName := operator.OperatorInfo().Name
+	operatorNames := operator.OperatorInfo().Names
 
-	if _, exists := r.operators[operatorName]; exists {
-		panic("OperatorRegistry: operator [" + operatorName + "] already registered")
+	for _, name := range operatorNames {
+		if _, exists := r.operators[name]; exists {
+			panic("OperatorRegistry: operator [" + name + "] already registered")
+		}
+
+		r.operators[name] = operator
 	}
 
-	r.operators[operatorName] = operator
 }
 
 // Operator gets the specified operator

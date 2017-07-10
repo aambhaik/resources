@@ -2,8 +2,8 @@ package condition
 
 // OperatorInfo is the information for an operation
 type OperatorInfo struct {
-	// Name of the operator
-	Name string
+	// Name(s) of the operator
+	Names []string
 	// Description of the operator
 	Description string
 }

@@ -10,10 +10,13 @@ used directly in an expression in mashling event-links. the operator
 must be preceded by a space (' ') and succeeded by a space (' ') when
 used in an expression.
 
+an operator can have more than one names. make sure that the names do not
+collide with other operators.
+
 e.g. ${trigger.content.amount < 20}
 */
 var infoLess = &OperatorInfo{
-	Name:        "<",
+	Names:       []string{"<"},
 	Description: `Support for 'less than' numerical operation to be used in the conditions`,
 }
 
