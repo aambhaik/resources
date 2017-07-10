@@ -5,7 +5,7 @@ import (
 )
 
 var infoNotIn = &OperatorInfo{
-	Name:        "not in",
+	Name:        "notin",
 	Description: `Support for 'not in' operation to be used in the conditions`,
 }
 
