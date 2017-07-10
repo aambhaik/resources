@@ -37,7 +37,7 @@ func GetOperatorInExpression(expression string) (*Operator, *string, error) {
 	return oper, operatorName, nil
 }
 
-func ValidateOperatorInExpression(expression string) bool {
+func ValidateOperatorInExpression(expression string) {
 	originalExpression := expression
 	/**
 	Content based conditions rules
@@ -57,17 +57,17 @@ func ValidateOperatorInExpression(expression string) bool {
 		If the value starts and ends without the single quote, then it is treated as an integer or a boolean.
 	*/
 	if !strings.HasPrefix(expression, util.Gateway_Link_Condition_LHS_Start_Expr) {
-		return false
+		panic(fmt.Errorf("Condition expresssion must start with [%v], invalid expression: [%v]", util.Gateway_Link_Condition_LHS_Start_Expr, originalExpression))
 	}
 	if !strings.HasSuffix(expression, util.Gateway_Link_Condition_LHS_End_Expr) {
-		return false
+		panic(fmt.Errorf("Condition expresssion must end with [%v], invalid expression: [%v]", util.Gateway_Link_Condition_LHS_End_Expr, originalExpression))
 	}
 
 	expression = expression[len(util.Gateway_Link_Condition_LHS_Start_Expr) : len(expression)-len(util.Gateway_Link_Condition_LHS_End_Expr)]
 	contentRoot := GetContentRoot()
 
 	if !strings.HasPrefix(expression, contentRoot) {
-		return false
+		panic(fmt.Errorf("Condition expression must start with prefix [%v]", contentRoot))
 	}
 
 	expression = strings.Replace(expression, contentRoot, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
@@ -99,9 +99,12 @@ func ValidateOperatorInExpression(expression string) bool {
 	}
 
 	if !operFound {
-		panic(fmt.Errorf("No valid operator found in expression: [%v]", originalExpression))
+		operators := make([]string, 0, len(OperatorRegistry.operators))
+		for k := range OperatorRegistry.operators {
+			operators = append(operators, k)
+		}
+		panic(fmt.Errorf("No valid operator found in expression: [%v], supported operators are %v", originalExpression, "[" + strings.Join(operators, ", ") + "]"))
 	}
-	return operFound
 }
 
 func IsJSON(s string) bool {
