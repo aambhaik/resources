@@ -98,6 +98,9 @@ func ValidateOperatorInExpression(expression string) bool {
 		}
 	}
 
+	if !operFound {
+		panic(fmt.Errorf("No valid operator found in expression: [%v]", originalExpression))
+	}
 	return operFound
 }
 
