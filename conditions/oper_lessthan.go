@@ -35,10 +35,12 @@ func (o *LessThan) Eval(lhs string, rhs string) bool {
 	lhsNum, err := strconv.Atoi(lhs)
 	if err != nil {
 		fLogger.Errorf("can not convert LHS value [%v] to an integer", lhs)
+		return false
 	}
 	rhsNum, err := strconv.Atoi(rhs)
 	if err != nil {
 		fLogger.Errorf("can not convert RHS value [%v] to an integer", rhs)
+		return false
 	}
 
 	if lhsNum < rhsNum {
