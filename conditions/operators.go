@@ -69,17 +69,19 @@ func (r *OperRegistry) Operator(operatorName string) (o Operator, exists bool) {
 }
 
 // Operators gets all the registered operators
-func (r *OperRegistry) Operators() []Operator {
+func (r *OperRegistry) Operators() ([]string, []Operator) {
 
 	r.operatorsMu.Lock()
 	defer r.operatorsMu.Unlock()
 
+	var names []string
 	var opers []Operator
-	for _, v := range r.operators {
+	for k, v := range r.operators {
+		names = append(names, k)
 		opers = append(opers, v)
 	}
 
-	return opers
+	return names, opers
 }
 
 // EvaluateExpression evaluates the specified expression
