@@ -28,9 +28,8 @@ type Operator interface {
 
 // OperRegistry is a registry for condition operators
 type OperRegistry struct {
-	operatorsMu   sync.Mutex
-	operatorNames []string
-	operators     map[string]Operator
+	operatorsMu sync.Mutex
+	operators   map[string]Operator
 }
 
 // NewOperatorRegistry creates a new operator registry
@@ -51,21 +50,6 @@ func (r *OperRegistry) RegisterOperator(operator Operator) {
 
 	if _, exists := r.operators[operatorName]; exists {
 		panic("OperatorRegistry: operator [" + operatorName + "] already registered")
-	}
-	if r.operatorNames == nil {
-		r.operatorNames = append(r.operatorNames, operatorName)
-	} else {
-		inserted := false
-		for index, o := range r.operatorNames {
-			if strings.Contains(o, operatorName) {
-				//the current operator is already part of another operator, so bump up the current operator
-				r.operatorNames = Insert(r.operatorNames, index, operatorName)
-				inserted = true
-			}
-		}
-		if !inserted {
-			r.operatorNames = append(r.operatorNames, operatorName)
-		}
 	}
 
 	r.operators[operatorName] = operator
@@ -93,15 +77,6 @@ func (r *OperRegistry) Operators() []Operator {
 	}
 
 	return opers
-}
-
-// Names gets all the registered operator names
-func (r *OperRegistry) Names() []string {
-
-	r.operatorsMu.Lock()
-	defer r.operatorsMu.Unlock()
-
-	return r.operatorNames
 }
 
 // EvaluateExpression evaluates the specified expression

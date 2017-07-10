@@ -2,36 +2,103 @@ package condition
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/aambhaik/resources/util"
 	"github.com/pkg/errors"
 	"os"
 	"regexp"
+	"strings"
 )
 
 func GetOperatorInExpression(expression string) (*Operator, *string, error) {
-	var operator *Operator
+	var oper *Operator
 	var operatorName *string
-	operNames := OperatorRegistry.Names()
-	for _, name := range operNames {
+	operators := OperatorRegistry.Operators()
+	for _, o := range operators {
+		name := o.OperatorInfo().Name
 		// Find words in the expression that *start* with operator
 		pattern := `\b` + " " + name + " "
 		r, _ := regexp.Compile(pattern)
 
 		if r.MatchString(expression) {
-			oper, exists := OperatorRegistry.Operator(name)
+			op, exists := OperatorRegistry.Operator(name)
 			if !exists {
 				continue
 			} else {
-				operator = &oper
+				oper = &op
 				operatorName = &name
 				break
 			}
 		}
 	}
-	if operator == nil {
+	if oper == nil {
 		return nil, nil, errors.Errorf("invalid operators found in expression [%v]", expression)
 	}
-	return operator, operatorName, nil
+	return oper, operatorName, nil
+}
+
+func ValidateOperatorInExpression(expression string) bool {
+	originalExpression := expression
+	/**
+	Content based conditions rules
+
+	The condition identifier is "${" at the start and "}" at the end.
+
+	If LHS
+		If the condition clause starts with "trigger.content" then it refers to the trigger's payload. It maps internally to the "$." JSONPath of the payload.
+		The above examples of JSONPath can be expressed as "${trigger.content.phoneNumbers[:1].type" and "${trigger.content.address.city" respectively.
+		If the condition clause does not start with "trigger.content": TBD
+		If it starts with "env" then it is evaluated as an environment variable. So, "${env.PROD_ENV == true}" will be evaluated as a condition based on the environment variable.
+	If Operator
+		The condition must evaluate to a boolean output. Example operators are "==" and "!=".
+	If RHS
+		The condition RHS will be interpreted as follows
+		If the value on the RHS starts and ends with a single-quote (''), then it is accessed as a string
+		If the value starts and ends without the single quote, then it is treated as an integer or a boolean.
+	*/
+	if !strings.HasPrefix(expression, util.Gateway_Link_Condition_LHS_Start_Expr) {
+		return false
+	}
+	if !strings.HasSuffix(expression, util.Gateway_Link_Condition_LHS_End_Expr) {
+		return false
+	}
+
+	expression = expression[len(util.Gateway_Link_Condition_LHS_Start_Expr) : len(expression)-len(util.Gateway_Link_Condition_LHS_End_Expr)]
+	contentRoot := GetContentRoot()
+
+	if !strings.HasPrefix(expression, contentRoot) {
+		return false
+	}
+
+	expression = strings.Replace(expression, contentRoot, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
+
+	expression = strings.TrimSpace(expression)
+
+	operFound := false
+	operators := OperatorRegistry.Operators()
+	for _, o := range operators {
+		name := o.OperatorInfo().Name
+		// Find words in the expression that *start* with operator
+		pattern := `\b` + " " + name + " "
+		r, _ := regexp.Compile(pattern)
+
+		if r.MatchString(expression) {
+			_, exists := OperatorRegistry.Operator(name)
+			if !exists {
+				continue
+			} else {
+				if !operFound {
+					operFound = true
+				} else {
+					//already one operator was found in the expression. here's another!
+					//multiple operators are not allowed in a single expression
+					panic(fmt.Errorf("Multiple operators not allowed in expression: [%v]", originalExpression))
+				}
+			}
+		}
+	}
+
+	return operFound
 }
 
 func IsJSON(s string) bool {

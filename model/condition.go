@@ -3,8 +3,8 @@ package model
 import (
 	"fmt"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/aambhaik/resources/util"
 	cutil "github.com/aambhaik/resources/conditions"
+	"github.com/aambhaik/resources/util"
 	"github.com/pkg/errors"
 	"strings"
 )

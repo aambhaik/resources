@@ -4,6 +4,14 @@ import (
 	"strings"
 )
 
+/**
+specify the exact name of the operator such that the operator can be
+used directly in an expression in mashling event-links. the operator
+must be preceded by a space (' ') and succeeded by a space (' ') when
+used in an expression.
+
+e.g. ${trigger.content.country notin (USA,IND,CHN,JPN)}
+*/
 var infoNotIn = &OperatorInfo{
 	Name:        "notin",
 	Description: `Support for 'not in' operation to be used in the conditions`,
