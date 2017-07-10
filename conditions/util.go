@@ -5,7 +5,7 @@ import (
 	"github.com/aambhaik/resources/util"
 	"github.com/pkg/errors"
 	"os"
-	"strings"
+	"regexp"
 )
 
 func GetOperatorInExpression(expression string) (*Operator, *string, error) {
@@ -13,7 +13,11 @@ func GetOperatorInExpression(expression string) (*Operator, *string, error) {
 	var operatorName *string
 	operNames := OperatorRegistry.Names()
 	for _, name := range operNames {
-		if strings.Contains(expression, name) {
+		// Find words in the expression that *start* with operator
+		pattern := `\b` + " " + name + " "
+		r, _ := regexp.Compile(pattern)
+
+		if r.MatchString(expression) {
 			oper, exists := OperatorRegistry.Operator(name)
 			if !exists {
 				continue
