@@ -60,7 +60,7 @@ func GoEvaluateCondition(expression string, payload string) (bool, error) {
 		lhsCondition = strings.TrimSpace(lhsCondition) + "+"
 		value, err := util.JsonPathEval(payload, lhsCondition)
 		if err != nil {
-			return false, fmt.Errorf("Failed to goeval JSONPath expression [%v] on payload [%v]", lhsCondition, payload)
+			return false, fmt.Errorf("Failed to goeval JSONPath expression [%v] on payload [%v], error [%v]", lhsCondition, payload, err)
 		}
 		output = value
 	} else if IsXML(payload) {
@@ -72,7 +72,7 @@ func GoEvaluateCondition(expression string, payload string) (bool, error) {
 
 		value, err := XpathEval(payload, xpathExpression)
 		if err != nil {
-			return false, fmt.Errorf("Failed to goeval XPath expression [%v] on payload [%v]", lhsCondition, payload)
+			return false, fmt.Errorf("Failed to goeval XPath expression [%v] on payload [%v], error [%v]", lhsCondition, payload, err)
 		}
 		output = value
 	} else {
