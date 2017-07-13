@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/TIBCOSoftware/flogo-lib/logger"
-	"github.com/aambhaik/resources/util"
+	"github.com/TIBCOSoftware/mashling-lib/util"
 	"strings"
 	"sync"
 )
@@ -94,7 +94,7 @@ func EvaluateExpression(expression string, content string) bool {
 	operator := condition.Operator
 	lhsExpression := condition.LHS
 
-	//evaluate the lhs against the content
+	//goeval the lhs against the content
 	lhs, err := util.JsonPathEval(content, lhsExpression)
 	if err != nil {
 		return false
@@ -113,7 +113,7 @@ func EvaluateCondition(condition Condition, content string) (bool, error) {
 	operator := condition.Operator
 	lhsExpression := condition.LHS
 
-	//evaluate the lhs against the content
+	//goeval the lhs against the content
 	lhs, err := util.JsonPathEval(content, lhsExpression)
 	if err != nil {
 		fLogger.Debugf("Error evaluating lhs jsonpath [%v] on the content [%v], [%v]", lhsExpression, content, err)
@@ -156,14 +156,12 @@ func GetConditionOperation(conditionStr string) (*Condition, error) {
 	If LHS
 		If the condition clause starts with "trigger.content" then it refers to the trigger's payload. It maps internally to the "$." JSONPath of the payload.
 		The above examples of JSONPath can be expressed as "${trigger.content.phoneNumbers[:1].type" and "${trigger.content.address.city" respectively.
-		If the condition clause does not start with "trigger.content": TBD
-		If it starts with "env" then it is evaluated as an environment variable. So, "${env.PROD_ENV == true}" will be evaluated as a condition based on the environment variable.
+		<<TBD>> If the condition clause does not start with "trigger.content":
+		<<TBD>> If it starts with "env" then it is evaluated as an environment variable. So, "${env.PROD_ENV == true}" will be evaluated as a condition based on the environment variable.
 	If Operator
-		The condition must evaluate to a boolean output. Example operators are "==" and "!=".
+		The condition must goeval to a boolean output. Example operators are "==" and "!=".
 	If RHS
-		The condition RHS will be interpreted as follows
-		If the value on the RHS starts and ends with a single-quote (''), then it is accessed as a string
-		If the value starts and ends without the single quote, then it is treated as an integer or a boolean.
+		The condition RHS will be interpreted as a string
 	*/
 	if !strings.HasPrefix(conditionStr, util.Gateway_Link_Condition_LHS_Start_Expr) {
 		return nil, errors.New("If does not match expected semantics, missing '${' at the start.")

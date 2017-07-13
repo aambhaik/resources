@@ -1,9 +1,12 @@
 package condition
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/aambhaik/resources/util"
+	"github.com/ChrisTrenkamp/goxpath"
+	"github.com/ChrisTrenkamp/goxpath/tree/xmltree"
+	"github.com/TIBCOSoftware/mashling-lib/util"
 	"github.com/pkg/errors"
 	"os"
 	"regexp"
@@ -47,14 +50,12 @@ func ValidateOperatorInExpression(expression string) {
 	If LHS
 		If the condition clause starts with "trigger.content" then it refers to the trigger's payload. It maps internally to the "$." JSONPath of the payload.
 		The above examples of JSONPath can be expressed as "${trigger.content.phoneNumbers[:1].type" and "${trigger.content.address.city" respectively.
-		If the condition clause does not start with "trigger.content": TBD
-		If it starts with "env" then it is evaluated as an environment variable. So, "${env.PROD_ENV == true}" will be evaluated as a condition based on the environment variable.
+		<<TBD>> If the condition clause does not start with "trigger.content":
+		<<TBD>> If it starts with "env" then it is evaluated as an environment variable. So, "${env.PROD_ENV == true}" will be evaluated as a condition based on the environment variable.
 	If Operator
-		The condition must evaluate to a boolean output. Example operators are "==" and "!=".
+		The condition must goeval to a boolean output. Example operators are "==" and "!=".
 	If RHS
-		The condition RHS will be interpreted as follows
-		If the value on the RHS starts and ends with a single-quote (''), then it is accessed as a string
-		If the value starts and ends without the single quote, then it is treated as an integer or a boolean.
+		The condition RHS will be interpreted as a string
 	*/
 	if !strings.HasPrefix(expression, util.Gateway_Link_Condition_LHS_Start_Expr) {
 		panic(fmt.Errorf("Condition expresssion must start with [%v], invalid expression: [%v]", util.Gateway_Link_Condition_LHS_Start_Expr, originalExpression))
@@ -110,6 +111,26 @@ func IsJSON(s string) bool {
 	var js interface{}
 	return json.Unmarshal([]byte(s), &js) == nil
 
+}
+
+func IsXML(s string) bool {
+	_, err := xmltree.ParseXML(bytes.NewBufferString(s))
+	return err == nil
+}
+
+func XpathEval(xmlPayload string, xpathExpression string) (*string, error) {
+	var xpExec = goxpath.MustParse(xpathExpression)
+	xTree, err := xmltree.ParseXML(bytes.NewBufferString(xmlPayload))
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := xpExec.Exec(xTree)
+	if err != nil {
+		return nil, err
+	}
+	value := res.String()
+	return &value, nil
 }
 
 func GetContentRoot() string {

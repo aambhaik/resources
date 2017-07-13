@@ -13,6 +13,8 @@ used in an expression.
 an operator can have more than one names. make sure that the names do not
 collide with other operators.
 
+this is a string (alphanumeric) operator that evaluates if a given string belongs to a collection of values.
+
 e.g. ${trigger.content.country notin (USA,IND,CHN,JPN)}
 */
 var infoNotIn = &OperatorInfo{

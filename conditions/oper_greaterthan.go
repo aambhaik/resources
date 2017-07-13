@@ -13,6 +13,8 @@ used in an expression.
 an operator can have more than one names. make sure that the names do not
 collide with other operators.
 
+this is a numeric operator that evaluates if a given number is greater than another number.
+
 e.g. ${trigger.content.amount > 20}
 */
 var infoGreater = &OperatorInfo{

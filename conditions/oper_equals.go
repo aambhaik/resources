@@ -13,6 +13,8 @@ used in an expression.
 an operator can have more than one names. make sure that the names do not
 collide with other operators.
 
+this is a string (alphanumeric) equality operator.
+
 e.g. ${trigger.content.country == USA}
 */
 var infoEquals = &OperatorInfo{
