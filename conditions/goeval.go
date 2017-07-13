@@ -27,7 +27,7 @@ import (
 //	GoEvaluateCondition(exp, payload)
 //}
 
-func GoEvaluateCondition(expression string, payload string) bool {
+func GoEvaluateCondition(expression string, payload string) (bool, error) {
 	originalExpression := expression
 	/**
 	The condition syntax uses govaluate expressions. Please refer to github.com/Knetic/govaluate for more information
@@ -39,18 +39,18 @@ func GoEvaluateCondition(expression string, payload string) bool {
 	*/
 	start := strings.Index(expression, util.Gateway_Link_Condition_LHS_Start_Expr)
 	if start < 0 {
-		panic(fmt.Errorf("Condition LHS expresssion must start with [%v], invalid expression: [%v]", util.Gateway_Link_Condition_LHS_Start_Expr, originalExpression))
+		return false, fmt.Errorf("Condition LHS expresssion must start with [%v], invalid expression: [%v]", util.Gateway_Link_Condition_LHS_Start_Expr, originalExpression)
 	}
 	end := strings.Index(expression, util.Gateway_Link_Condition_LHS_End_Expr)
 	if end < 0 {
-		panic(fmt.Errorf("Condition LHS expresssion must end with [%v], invalid expression: [%v]", util.Gateway_Link_Condition_LHS_End_Expr, originalExpression))
+		return false, fmt.Errorf("Condition LHS expresssion must end with [%v], invalid expression: [%v]", util.Gateway_Link_Condition_LHS_End_Expr, originalExpression)
 	}
 
 	lhsCondition := expression[start+len(util.Gateway_Link_Condition_LHS_Start_Expr) : end]
 	contentRoot := condition.GetContentRoot()
 
 	if !strings.HasPrefix(lhsCondition, contentRoot) {
-		panic(fmt.Sprintf("condition 'If' JSONPath must start with %v", contentRoot))
+		return false, fmt.Errorf("condition 'If' JSONPath must start with %v", contentRoot)
 	}
 
 	lhsCondition = strings.Replace(lhsCondition, contentRoot, util.Gateway_Link_Condition_LHS_JSONPath_Root, -1)
@@ -60,7 +60,7 @@ func GoEvaluateCondition(expression string, payload string) bool {
 		lhsCondition = strings.TrimSpace(lhsCondition) + "+"
 		value, err := util.JsonPathEval(payload, lhsCondition)
 		if err != nil {
-			panic(fmt.Errorf("Failed to goeval JSONPath expression [%v] on payload [%v]", lhsCondition, payload))
+			return false, fmt.Errorf("Failed to goeval JSONPath expression [%v] on payload [%v]", lhsCondition, payload)
 		}
 		output = value
 	} else if IsXML(payload) {
@@ -72,12 +72,12 @@ func GoEvaluateCondition(expression string, payload string) bool {
 
 		value, err := XpathEval(payload, xpathExpression)
 		if err != nil {
-			panic(fmt.Errorf("Failed to goeval XPath expression [%v] on payload [%v]", lhsCondition, payload))
+			return false, fmt.Errorf("Failed to goeval XPath expression [%v] on payload [%v]", lhsCondition, payload)
 		}
 		output = value
 	} else {
 		//unsupported data format. the supported formats are JSON and XML
-		panic(fmt.Errorf("Unknown data format on payload [%v] \nSupported formats are JSON and XML", payload))
+		return false, fmt.Errorf("Unknown data format on payload [%v] \nSupported formats are JSON and XML", payload)
 	}
 
 	//substitute the result of the JSONPath evaluation in to the original LHS expression
@@ -88,10 +88,10 @@ func GoEvaluateCondition(expression string, payload string) bool {
 	return goeval(expression, lhs, *output)
 }
 
-func goeval(exp string, paramName string, paramValue string) bool {
+func goeval(exp string, paramName string, paramValue string) (bool, error) {
 	expression, err := govaluate.NewEvaluableExpression(exp)
 	if err != nil {
-		fmt.Sprintf("invalid expression [%v]", exp)
+		return false, fmt.Errorf("invalid expression [%v], err [%v]", exp, err)
 	}
 	parameters := make(map[string]interface{})
 	number, err := strconv.ParseFloat(paramValue, 64)
@@ -104,14 +104,8 @@ func goeval(exp string, paramName string, paramValue string) bool {
 
 	r, err := expression.Evaluate(parameters)
 	if err != nil {
-		panic(fmt.Sprintf("invalid expression [%v], err [%v]", exp, err))
-	}
-	result := r.(bool)
-	if result {
-		fmt.Printf("condition result true")
-	} else {
-		fmt.Printf("condition result false")
+		return false, fmt.Errorf("invalid expression [%v], err [%v]", exp, err)
 	}
 
-	return result
+	return r.(bool), nil
 }
