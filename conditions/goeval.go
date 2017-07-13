@@ -2,7 +2,7 @@ package condition
 
 import (
 	"fmt"
-	"github.com/Knetic/govaluate"
+	"gopkg.in/Knetic/govaluate.v3"
 	"github.com/TIBCOSoftware/mashling-lib/conditions"
 	"github.com/aambhaik/resources/util"
 	"regexp"
