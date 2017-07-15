@@ -2,13 +2,23 @@ package condition
 
 import (
 	"fmt"
-	"gopkg.in/Knetic/govaluate.v3"
 	"github.com/TIBCOSoftware/mashling-lib/conditions"
 	"github.com/aambhaik/resources/util"
+	"gopkg.in/Knetic/govaluate.v3"
 	"regexp"
 	"strconv"
 	"strings"
 )
+
+func main() {
+	expr := "$..book[?(@.price<10)].category[0]"
+	//expr := "$..book[:2].author"
+	xpath, err := ConvertJsonPathToXPath(expr)
+	if err != nil {
+		panic(fmt.Errorf("Error converting json path to xpath [%v]", err))
+	}
+	fmt.Printf("jsonpath is %v, xpath expression is %v", expr, *xpath)
+}
 
 func GoEvaluateCondition(expression string, payload string) (bool, error) {
 	originalExpression := expression
@@ -56,12 +66,11 @@ func GoEvaluateCondition(expression string, payload string) (bool, error) {
 			output = value
 		} else if IsXML(payload) {
 			lhsCondition = strings.TrimSpace(lhsCondition)
-			// jsonpath expression will begin with $. this translates to the root '/' in xpath.
-			// subsequent json nodes are identified by '.' which again translates to '/' in xpath
-			xpathExpression := strings.Replace(lhsCondition, "$.", "/", -1)
-			xpathExpression = strings.Replace(xpathExpression, ".", "/", -1)
-
-			value, err := util.XPathEval(payload, xpathExpression)
+			xPathExpression, err := ConvertJsonPathToXPath(lhsCondition)
+			if err != nil {
+				return false, fmt.Errorf("Failed to evaluate condition %v XPath expression %v on payload [%v]", xPathExpression, lhsCondition, payload)
+			}
+			value, err := util.XPathEval(payload, *xPathExpression)
 			if err != nil {
 				panic(fmt.Errorf("Failed to evaluate XPath expression [%v] on payload [%v]", lhsCondition, payload))
 			}
