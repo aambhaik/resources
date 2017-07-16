@@ -10,16 +10,6 @@ import (
 	"strings"
 )
 
-func main() {
-	expr := "$..book[?(@.price<10)].category[0]"
-	//expr := "$..book[:2].author"
-	xpath, err := ConvertJsonPathToXPath(expr)
-	if err != nil {
-		panic(fmt.Errorf("Error converting json path to xpath [%v]", err))
-	}
-	fmt.Printf("jsonpath is %v, xpath expression is %v", expr, *xpath)
-}
-
 func GoEvaluateCondition(expression string, payload string) (bool, error) {
 	originalExpression := expression
 	/**
