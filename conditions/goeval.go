@@ -62,12 +62,12 @@ func GoEvaluateCondition(expression string, payload string) (bool, error) {
 			}
 			value, err := util.XPathEval(payload, *xPathExpression)
 			if err != nil {
-				panic(fmt.Errorf("Failed to evaluate XPath expression [%v] on payload [%v]", lhsCondition, payload))
+				return false, fmt.Errorf("Failed to evaluate XPath expression [%v] on payload [%v]", lhsCondition, payload)
 			}
 			output = value
 		} else {
 			//unsupported data format. the supported formats are JSON and XML
-			panic(fmt.Errorf("Unknown data format on payload [%v] \nSupported formats are JSON and XML", payload))
+			return false, fmt.Errorf("Unknown data format on payload [%v] \nSupported formats are JSON and XML", payload)
 		}
 
 		//substitute the result of the JSONPath evaluation in to the original LHS expression
