@@ -32,7 +32,6 @@ func init() {
 
 	xpDependence = make(map[string]string)
 	xpDependence["(@.length-1)"] = ")]"
-	xpDependence["(@.length-1)"] = ")]"
 }
 
 func ConvertJsonPathToXPath(jsonPathExpression string) (xPathExpression *string, err error) {
